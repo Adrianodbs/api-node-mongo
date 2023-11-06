@@ -1,7 +1,7 @@
 import { FiTrash } from 'react-icons/fi'
 import { api } from './services/api'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, FormEvent } from 'react'
 
 interface CustomerProps {
   id: string
@@ -13,6 +13,8 @@ interface CustomerProps {
 
 function App() {
   const [customers, setCustomers] = useState<CustomerProps[]>([])
+  const nameRef = useRef<HTMLInputElement | null>(null)
+  const emailRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     loadCustomers()
@@ -23,17 +25,31 @@ function App() {
     setCustomers(response.data)
   }
 
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+
+    if (!nameRef.current?.value || !emailRef.current?.value) return
+
+    const response = await api.post('/customer', {
+      name: nameRef.current?.value,
+      email: emailRef.current?.value
+    })
+
+    setCustomers(allCustomers => [...allCustomers, response.data])
+  }
+
   return (
     <div className="w-full min-h-screen bg-gray-900 flex justify-center px-4">
       <main className="my-10 w-full md:max-w-2xl">
         <h1 className="text-4xl font-medium text-white">Clientes</h1>
 
-        <form className="flex flex-col my-6">
+        <form className="flex flex-col my-6" onSubmit={handleSubmit}>
           <label className="font-medium text-white">Nome:</label>
           <input
             type="text"
             placeholder="Digite o seu nome"
             className="w-full mb-5 p-2 rounded"
+            ref={nameRef}
           />
 
           <label className="font-medium text-white">Email:</label>
@@ -41,6 +57,7 @@ function App() {
             type="email"
             placeholder="Digite o seu e-mail"
             className="w-full mb-5 p-2 rounded"
+            ref={emailRef}
           />
 
           <input
