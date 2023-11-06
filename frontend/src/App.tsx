@@ -1,6 +1,28 @@
 import { FiTrash } from 'react-icons/fi'
+import { api } from './services/api'
+
+import { useState, useEffect } from 'react'
+
+interface CustomerProps {
+  id: string
+  name: string
+  email: string
+  status: boolean
+  created_at: string
+}
 
 function App() {
+  const [customers, setCustomers] = useState<CustomerProps[]>([])
+
+  useEffect(() => {
+    loadCustomers()
+  }, [])
+
+  async function loadCustomers() {
+    const response = await api.get('/customers')
+    setCustomers(response.data)
+  }
+
   return (
     <div className="w-full min-h-screen bg-gray-900 flex justify-center px-4">
       <main className="my-10 w-full md:max-w-2xl">
@@ -28,22 +50,28 @@ function App() {
           />
         </form>
 
-        <section className="flex flex-col">
-          <article className="w-full bg-white rounded p-2 relative hover:scale-105 duration-200">
-            <p>
-              <span className="font-medium">Nome:</span> Adriano
-            </p>
-            <p>
-              <span className="font-medium">Email:</span> Adriano@teste.com
-            </p>
-            <p>
-              <span className="font-medium">Status:</span> Ativo
-            </p>
+        <section className="flex flex-col gap-4">
+          {customers.map(customer => (
+            <article
+              key={customer.id}
+              className="w-full bg-white rounded p-2 relative hover:scale-105 duration-200"
+            >
+              <p>
+                <span className="font-medium">Nome:</span> {customer.name}
+              </p>
+              <p>
+                <span className="font-medium">Email:</span> {customer.email}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span>{' '}
+                {customer.status ? 'Ativo' : 'Inativo'}
+              </p>
 
-            <button className="bg-red-500 w-7 h-7 flex items-center justify-center rounded-lg absolute right-0 -top-2">
-              <FiTrash size={18} color="#fff" />
-            </button>
-          </article>
+              <button className="bg-red-500 w-7 h-7 flex items-center justify-center rounded-lg absolute right-0 -top-2">
+                <FiTrash size={18} color="#fff" />
+              </button>
+            </article>
+          ))}
         </section>
       </main>
     </div>
